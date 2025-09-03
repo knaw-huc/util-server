@@ -1,0 +1,9 @@
+services:
+  util-server:
+    image: util-server:latest
+    container_name: util-server
+    restart: unless-stopped
+    volumes:
+      - "./tmp:/app/tmp"
+    ports:
+      - "8000:8000"
