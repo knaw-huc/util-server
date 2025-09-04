@@ -13,11 +13,11 @@ def generate_md5(text: str | None, q: str | None = Query(None, alias="text")):
     if q and q != "":
         text = q
     md5_hash = hashlib.md5(text.encode()).hexdigest()
-    return {"md5": md5_hash}
+    return str(md5_hash)
 
 @app.get("/uuid")
 def generate_uuid():
-    return {"uuid": str(uuid.uuid4())}
+    return str(uuid.uuid4())
 
 # @app.get("/files")
 # def serve_file(file_path: str = Query(..., description="Path to the file")):
