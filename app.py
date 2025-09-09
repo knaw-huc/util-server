@@ -73,13 +73,16 @@ def proxy(request: Request,
         logger.info(f"Accept header: {accept_header}")
         headers = {"Accept": accept_header} if accept_header else accept_header
         if bearer:
-            headers["Bearer"] = bearer
+            headers["Authorization"] = f"Bearer {bearer}"
         logger.info(f"Request Headers: {headers}")
         response = httpx.get(decoded_url, headers=headers, follow_redirects=follow_redirects)
-        response.raise_for_status()
-        content = response.content
-        cache.set(key=decoded_url, value=content.decode('utf-8'), ttl=settings.ttl)
-        logger.debug(f"Origin Content: {content}")
+        if 199 < response.status_code < 300:
+            content = response.content
+            logger.debug(f"Origin Content: {content}")
+            cache.set(key=decoded_url, value=content.decode('utf-8'), ttl=settings.ttl)
+        else:
+            content = f"Error: Received status code {response.status_code} from {decoded_url}"
+            logger.error(content)
         return Response(content=content, media_type=accept_header)
     except httpx.RequestError as e:
         raise HTTPException(status_code=502, detail=str(e))
