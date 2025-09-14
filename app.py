@@ -44,7 +44,8 @@ def proxy(request: Request,
           url: str = Query(...),
           bearer: str | None = Query(None),
           accept: str | None = Query(None, alias="accept"),
-          follow_redirects: bool = Query(True)
+          follow_redirects: bool = Query(True),
+          ttl:  int | None = Query(settings.ttl)
           ):
     # full_requested_url = str(request.url)
     # full_requested_url_parsed = urlparse(full_requested_url)
@@ -79,7 +80,7 @@ def proxy(request: Request,
         if 199 < response.status_code < 300:
             content = response.content
             logger.debug(f"Origin Content: {content}")
-            cache.set(key=decoded_url, value=content.decode('utf-8'), ttl=settings.ttl)
+            cache.set(key=decoded_url, value=content.decode('utf-8'), ttl=ttl)
         else:
             content = f"Error: Received status code {response.status_code} from {decoded_url}"
             logger.error(content)
