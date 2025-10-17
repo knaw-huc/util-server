@@ -34,9 +34,19 @@ def generate_md5(text: str | None, q: str | None = Query(None, alias="text")):
     return PlainTextResponse(str(md5_hash))
 
 
+
 @app.get("/uuid")
-def generate_uuid():
-    return PlainTextResponse(str(uuid.uuid4()))
+def generate_uuid(request: Request,key: str | None = Query(None),ttl:  int | None = Query(settings.ttl)):
+    res = str(uuid.uuid4())
+    if key and key.strip()!='':
+        url = f"http://localhost:8000/uuid?text={key}"
+        cached_content = cache.get(key=url)
+        if cached_content:
+            res = cached_content
+        else:
+            content=str(uuid.uuid4())
+            cache.set(key=url, value=res, ttl=ttl)
+    return PlainTextResponse(res)
 
 
 @app.get("/proxy")
